@@ -33,7 +33,7 @@ on Monday between 9am and 5pm Pacific Time
     }
 }
 """
-async def load_overrides():
+def load_overrides():
     """
     Loads an overrides file, which contains rules
     that will work in addition to the default of "no voice from 3am to 8am"
@@ -50,7 +50,7 @@ async def maybe_kick_member_from_voice(member: discord.Member):
     current_time_pacific = current_time_utc - timedelta(hours=7)
     current_weekday = current_time_pacific.weekday()
     current_hour = current_time_pacific.hour
-    overrides = await load_overrides()
+    overrides = load_overrides()
 
     member_id = str(member.id)
     # No overrides present, follow the default rule
@@ -103,4 +103,5 @@ async def on_ready():
     print(f'Logged in as {bot.user.name}')
     bot.loop.create_task(run_loop())
 
-bot.run(TOKEN)
+if __name__ == "__main__":
+    bot.run(TOKEN)
