@@ -41,7 +41,7 @@ def load_overrides():
     with open("Overrides.json", "r", encoding="UTF-8") as overrides_file:
         return json.load(overrides_file)
 
-async def maybe_kick_member_from_voice(member: discord.Member):
+def should_kick_member_from_voice(member: discord.Member) -> bool:
     """
     Common function for usage in both 'run_loop()' and 'on_voice_state_update'
     so that both functions respect the overrides file
@@ -57,20 +57,21 @@ async def maybe_kick_member_from_voice(member: discord.Member):
     member_override = overrides.get(member_id)
     if member_override is None or len(member_override) == 0:
         if 3 <= current_hour <= 8:
-            await member.move_to(None)
+            return True
     else:
         weekday_override = member_override.get("weekday")
         hour_start_override = member_override.get("hour_start")
         hour_end_override = member_override.get("hour_end")
         if weekday_override is not None and hour_start_override is not None:
             if current_weekday == weekday_override and current_hour == hour_start_override:
-                await member.move_to(None)
+                return True
         elif weekday_override is not None and hour_start_override is None:
             if current_weekday == weekday_override:
-                await member.move_to(None)
+                return True
         elif weekday_override is None and hour_start_override is not None:
             if hour_start_override <= current_hour < hour_end_override:
-                await member.move_to(None)
+                return True
+    return False
 
 async def run_loop():
     """ Main run loop of the bot """
@@ -80,8 +81,10 @@ async def run_loop():
     while not bot.is_closed():
         for channel in guild.voice_channels:
             for member in channel.members:
-                await maybe_kick_member_from_voice(member)
+                if should_kick_member_from_voice(member):
+                    await member.move_to(None)
                 await asyncio.sleep(60)
+
 
 @bot.event
 async def on_voice_state_update(member: discord.Member,
@@ -95,7 +98,9 @@ async def on_voice_state_update(member: discord.Member,
     if after.channel is None:
         return
 
-    await maybe_kick_member_from_voice(member)
+    if should_kick_member_from_voice(member):
+        await member.move_to(None)
+    
 
 @bot.event
 async def on_ready():
