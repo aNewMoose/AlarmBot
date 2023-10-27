@@ -54,7 +54,7 @@ async def maybe_kick_member_from_voice(member: discord.Member):
 
     member_id = str(member.id)
     # No overrides present, follow the default rule
-    member_override = overrides[member_id]
+    member_override = overrides.get(member_id)
     if member_override is None or len(member_override) == 0:
         if 3 <= current_hour <= 8:
             await member.move_to(None)
