@@ -38,7 +38,7 @@ async def load_overrides():
     Loads an overrides file, which contains rules
     that will work in addition to the default of "no voice from 3am to 8am"
     """
-    with open("Overrides.txt", "r", encoding="UTF-8") as overrides_file:
+    with open("Overrides.json", "r", encoding="UTF-8") as overrides_file:
         return json.load(overrides_file)
 
 async def maybe_kick_member_from_voice(member: discord.Member):
